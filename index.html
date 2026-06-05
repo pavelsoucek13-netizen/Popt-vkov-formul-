@@ -475,9 +475,12 @@
     border-radius: 4px;
     padding: 16px 18px;
     margin-top: 4px;
-    display: none;
+    display: block;
+    opacity: 0.45;
+    pointer-events: none;
+    transition: opacity 0.2s;
   }
-  .coffee-time-row.visible { display: block; }
+  .coffee-time-row.visible { opacity: 1; pointer-events: auto; }
   .coffee-time-label {
     font-size: 12px;
     font-weight: 600;
