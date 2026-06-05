@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Slovan – Poptávka / Inquiry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --burgundy: #7B1D42;
+    --burgundy-dark: #5a1430;
+    --burgundy-light: #9e2e59;
+    --cream: #fdf6ee;
+    --cream-dark: #f5e8d8;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --text-dark: #2a1a1a;
+    --text-mid: #4a2e2e;
+    --white: #ffffff;
+    --border: rgba(123,29,66,0.2);
+    --wave-color: rgba(123,29,66,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Raleway', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* LANGUAGE SWITCH */
+  .lang-bar {
+    background: var(--burgundy-dark);
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 40px;
+    gap: 4px;
+  }
+  .lang-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.6);
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 4px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+  .lang-btn.active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-color: rgba(255,255,255,0.6);
+  }
+
+  /* HEADER */
+  .hero {
+    background: var(--burgundy);
+    padding: 60px 40px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='25' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 80px 80px;
+  }
+  .hero-logo {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero-logo span {
+    display: inline-block;
+    border-top: 1px solid var(--gold);
+    border-bottom: 1px solid var(--gold);
+    padding: 4px 20px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.2;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .hero-sub {
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.65);
+    text-transform: uppercase;
+    position: relative;
+    margin-top: 8px;
+  }
+
+  /* WAVE DIVIDER */
+  .wave {
+    width: 100%;
+    height: 40px;
+    background: var(--burgundy);
+    clip-path: ellipse(55% 100% at 50% 0%);
+    margin-bottom: -1px;
+  }
+
+  /* MAIN */
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* SECTION HEADER */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 44px 0 20px;
+  }
+  .section-label .num {
+    width: 36px;
+    height: 36px;
+    background: var(--burgundy);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-label h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--burgundy);
+  }
+  .section-label .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CARDS GRID */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .option-card {
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fff;
+    position: relative;
+    user-select: none;
+  }
+  .option-card:hover {
+    border-color: var(--burgundy-light);
+    background: #fdf0f5;
+  }
+  .option-card.selected {
+    border-color: var(--burgundy);
+    background: #fdf0f5;
+    box-shadow: inset 0 0 0 1px var(--burgundy);
+  }
+  .option-card input[type="checkbox"],
+  .option-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .option-card .check {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+  .option-card.radio-style .check {
+    border-radius: 50%;
+  }
+  .option-card.selected .check {
+    background: var(--burgundy);
+    border-color: var(--burgundy);
+  }
+  .option-card.selected .check::after {
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+  }
+  .option-card .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+  }
+  .option-card .card-detail {
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+  .option-card .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--burgundy);
+    margin-top: 8px;
+  }
+
+  /* WAVY DIVIDER */
+  .wavy {
+    margin: 32px 0;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12'%3E%3Cpath d='M0,6 C20,0 40,12 60,6 C80,0 100,12 120,6 C140,0 160,12 180,6 C200,0 220,12' fill='none' stroke='rgba(123,29,66,0.2)' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 200px 12px;
+  }
+
+  /* DATE + PERSONS ROW */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media(max-width: 580px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* FORM FIELDS */
+  .field-group {
+    margin-bottom: 16px;
+  }
+  .field-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--burgundy);
+    margin-bottom: 6px;
+  }
+  .field-group input,
+  .field-group textarea,
+  .field-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    background: #fff;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field-group input:focus,
+  .field-group textarea:focus,
+  .field-group select:focus {
+    border-color: var(--burgundy);
+  }
+  .field-group textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.6;
+  }
+
+  /* PRICE SUMMARY */
+  .price-box {
+    background: var(--burgundy);
+    border-radius: 4px;
+    padding: 24px 28px;
+    margin: 32px 0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .price-box .label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  .price-box .amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: var(--gold-light);
+  }
+  .price-box .note {
+    font-size: 12px;
+    opacity: 0.55;
+    font-weight: 300;
+  }
+  .price-breakdown {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 4px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    background: var(--burgundy);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .submit-btn:hover {
+    background: var(--burgundy-dark);
+    transform: translateY(-1px);
+  }
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  /* SUCCESS */
+  .success-panel {
+    display: none;
+    text-align: center;
+    padding: 60px 40px;
+  }
+  .success-panel .icon {
+    width: 64px;
+    height: 64px;
+    background: var(--burgundy);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 28px;
+    color: #fff;
+  }
+  .success-panel h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--burgundy);
+    margin-bottom: 12px;
+  }
+  .success-panel p {
+    font-size: 15px;
+    color: var(--text-mid);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* CONSENT */
+  .consent-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 16px;
+  }
+  .consent-row input[type="checkbox"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+    accent-color: var(--burgundy);
+    width: 16px;
+    height: 16px;
+  }
+  .consent-row label {
+    font-size: 12px;
+    color: var(--text-mid);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 28px;
+    background: var(--burgundy-dark);
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  footer strong {
+    color: var(--gold);
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    margin-bottom: 4px;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .required-star { color: var(--gold); margin-left: 2px; }
+  .hint { font-size: 11px; color: var(--text-mid); margin-top: 4px; opacity: 0.7; font-style: italic; }
+
+  [lang-cz] { display: block; }
+  [lang-en] { display: none; }
+  .en-mode [lang-cz] { display: none; }
+  .en-mode [lang-en] { display: block; }
+
+  .overnight-sub { margin-top: 12px; padding: 14px 16px; background: var(--cream-dark); border-radius: 3px; border-left: 3px solid var(--burgundy); display: none; }
+  .overnight-sub.visible { display: block; }
+  .overnight-sub label { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--burgundy); margin-bottom: 6px; display: block; }
+  .overnight-sub input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 3px; font-family: 'Raleway', sans-serif; font-size: 14px; color: var(--text-dark); background: #fff; outline: none; }
+  .overnight-sub input:focus { border-color: var(--burgundy); }
+
+  /* Food subsections */
+  .food-subsection { margin-bottom: 28px; }
+  .subsection-header {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--burgundy);
+    padding: 8px 14px;
+    background: var(--cream-dark);
+    border-left: 3px solid var(--burgundy);
+    border-radius: 0 3px 3px 0;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .subsection-note {
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: none;
+    color: var(--text-mid);
+    opacity: 0.7;
+  }
+
+  /* Coffee time row */
+  .coffee-time-row {
+    background: var(--cream-dark);
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-top: 4px;
+    display: block;
+    opacity: 0.45;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .coffee-time-row.visible { opacity: 1; pointer-events: auto; }
+  .coffee-time-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--burgundy);
+    margin-bottom: 10px;
+  }
+  .coffee-time-options { display: flex; gap: 10px; flex-wrap: wrap; }
+  .time-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dark);
+    background: #fff;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .time-pill input { display: none; }
+  .time-pill:hover { border-color: var(--burgundy-light); background: #fdf0f5; }
+  .time-pill.active {
+    background: var(--burgundy);
+    border-color: var(--burgundy);
+    color: #fff;
+  }
+  .coffee-time-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--burgundy);
+    font-style: italic;
+  }
+
+  /* No-food card horizontal style */
+  .no-food-card { flex-direction: row !important; }
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('cz')" id="btn-cz">CZ</button>
+  <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+</div>
+
+<div class="hero">
+  <div class="hero-logo"><span>Hotel Slovan · Tradice od roku 1868</span></div>
+  <h1>
+    <span lang-cz>Poptávka akce &amp;<br><em>banketní nabídka</em></span>
+    <span lang-en>Event Inquiry &amp;<br><em>Banquet Offer</em></span>
+  </h1>
+  <p class="hero-sub">
+    <span lang-cz>Jeseník · Česká republika</span>
+    <span lang-en>Jeseník · Czech Republic</span>
+  </p>
+</div>
+
+<div class="container">
+  <form id="inquiry-form" novalidate>
+
+    <!-- STEP 1: PROSTOR -->
+    <div class="section-label">
+      <div class="num">1</div>
+      <h2><span lang-cz>Výběr prostoru</span><span lang-en>Venue Selection</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="options-grid">
+      <label class="option-card radio-style" id="card-ripper" onclick="selectVenue('ripper', this)">
+        <input type="radio" name="venue" value="ripper">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Sál Ripper</span><span lang-en>Ripper Hall</span></div>
+        <div class="card-detail">
+          <span lang-cz>Divadlo 90 os. · Škola 50 os. · Blok / U 30 os.<br>Dataprojektor, plátno, flip chart, Wi-Fi</span>
+          <span lang-en>Theatre 90p · Classroom 50p · Block/U 30p<br>Projector, screen, flip chart, Wi-Fi</span>
+        </div>
+        <div class="card-price"><span lang-cz>od 5 000 Kč</span><span lang-en>from CZK 5,000</span></div>
+      </label>
+
+      <label class="option-card radio-style" id="card-salonek" onclick="selectVenue('salonek', this)">
+        <input type="radio" name="venue" value="salonek">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Salónek</span><span lang-en>Salon</span></div>
+        <div class="card-detail">
+          <span lang-cz>Blok / U / Škola 12 os.<br>TV, bezdrátový přenos, flip chart, Wi-Fi</span>
+          <span lang-en>Block / U / Classroom 12p<br>TV, wireless display, flip chart, Wi-Fi</span>
+        </div>
+        <div class="card-price"><span lang-cz>od 4 000 Kč</span><span lang-en>from CZK 4,000</span></div>
+      </label>
+    </div>
+
+    <!-- STEP 2: DATUM A POCET -->
+    <div class="section-label">
+      <div class="num">2</div>
+      <h2><span lang-cz>Datum a počet osob</span><span lang-en>Date & Number of Guests</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="field-group">
+        <label><span lang-cz>Datum akce</span><span lang-en>Event Date</span> <span class="required-star">*</span></label>
+        <input type="date" name="date" id="event-date" required min="">
+      </div>
+      <div class="field-group">
+        <label><span lang-cz>Počet osob</span><span lang-en>Number of Guests</span> <span class="required-star">*</span></label>
+        <input type="number" name="persons" id="persons" min="1" max="200" placeholder="20" required oninput="updatePrice()">
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="field-group">
+        <label><span lang-cz>Délka pronájmu</span><span lang-en>Rental Duration</span></label>
+        <select name="duration" id="duration" onchange="updatePrice()">
+          <option value="half"><span lang-cz>Půldenní (do 4 hod.)</span><span lang-en>Half-day (up to 4 hrs)</span></option>
+          <option value="full"><span lang-cz>Celodenní (4 hod. a více)</span><span lang-en>Full-day (4+ hrs)</span></option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label><span lang-cz>Typ uspořádání</span><span lang-en>Seating Style</span></label>
+        <select name="layout" id="layout">
+          <option value="divadlo" data-cz="Divadlo" data-en="Theatre">Divadlo / Theatre</option>
+          <option value="skola" data-cz="Škola" data-en="Classroom">Škola / Classroom</option>
+          <option value="u" data-cz="Tvar U" data-en="U-Shape">Tvar U / U-Shape</option>
+          <option value="blok" data-cz="Blok" data-en="Block">Blok / Block</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="wavy"></div>
+
+    <!-- STEP 3: STRAVOVÁNÍ -->
+    <div class="section-label">
+      <div class="num">3</div>
+      <h2><span lang-cz>Stravování</span><span lang-en>Catering</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <!-- Bez stravování -->
+    <label class="option-card no-food-card" onclick="selectNoFood(this)" data-group="food" data-price="0" style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+      <input type="checkbox" name="food_none" value="none">
+      <div class="check" style="margin-bottom:0; flex-shrink:0;"></div>
+      <div>
+        <div class="card-title"><span lang-cz>Bez stravování</span><span lang-en>No Catering</span></div>
+        <div class="card-detail"><span lang-cz>Jen pronájem prostoru</span><span lang-en>Venue hire only</span></div>
+      </div>
+    </label>
+
+    <!-- SUBSEKCE: Kávové přestávky -->
+    <div class="food-subsection">
+      <div class="subsection-header">
+        <span lang-cz>☕ Kávové přestávky</span>
+        <span lang-en>☕ Coffee Breaks</span>
+        <span class="subsection-note"><span lang-cz>min. 15 osob · cena za osobu a přestávku</span><span lang-en>min. 15 guests · price per person per break</span></span>
+      </div>
+
+      <div class="options-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom:14px;">
+        <label class="option-card" onclick="toggleCard(this, 'coffee')" data-group="coffee" data-price="140">
+          <input type="checkbox" name="coffee_type" value="coffee-klasik">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Klasik</span><span lang-en>Classic</span></div>
+          <div class="card-detail"><span lang-cz>Sladké + slané pečivo, ovoce, nápoje</span><span lang-en>Sweet + savoury pastries, fruit, drinks</span></div>
+          <div class="card-price">140 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'coffee')" data-group="coffee" data-price="170">
+          <input type="checkbox" name="coffee_type" value="coffee-komfort">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Komfort</span><span lang-en>Comfort</span></div>
+          <div class="card-detail"><span lang-cz>Klasik + chlebíčky</span><span lang-en>Classic + open sandwiches</span></div>
+          <div class="card-price">170 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'coffee')" data-group="coffee" data-price="190">
+          <input type="checkbox" name="coffee_type" value="coffee-premium">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Prémium</span><span lang-en>Premium</span></div>
+          <div class="card-detail"><span lang-cz>Komfort + slané pečivo navíc</span><span lang-en>Comfort + extra savoury pastries</span></div>
+          <div class="card-price">190 Kč/os</div>
+        </label>
+      </div>
+
+      <!-- Čas přestávky – zobrazí se po výběru varianty -->
+      <div class="coffee-time-row" id="coffee-time-row">
+        <div class="coffee-time-label">
+          <span lang-cz>Kdy si přejete přestávku?</span>
+          <span lang-en>When would you like the break?</span>
+        </div>
+        <div class="coffee-time-options">
+          <label class="time-pill" onclick="setCoffeeTime('dopoledni', this)">
+            <input type="radio" name="coffee_time" value="dopoledni">
+            <span lang-cz>Dopolední</span><span lang-en>Morning</span>
+          </label>
+          <label class="time-pill" onclick="setCoffeeTime('odpoledni', this)">
+            <input type="radio" name="coffee_time" value="odpoledni">
+            <span lang-cz>Odpolední</span><span lang-en>Afternoon</span>
+          </label>
+          <label class="time-pill" onclick="setCoffeeTime('obe', this)">
+            <input type="radio" name="coffee_time" value="obe">
+            <span lang-cz>Obě (2×)</span><span lang-en>Both (2×)</span>
+          </label>
+        </div>
+        <div class="coffee-time-note" id="coffee-both-note" style="display:none;">
+          <span lang-cz>Cena bude zdvojnásobena (2 přestávky)</span>
+          <span lang-en>Price doubled (2 breaks)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBSEKCE: Set menu -->
+    <div class="food-subsection">
+      <div class="subsection-header">
+        <span lang-cz>🍽 Set menu</span>
+        <span lang-en>🍽 Set Menu</span>
+        <span class="subsection-note"><span lang-cz>min. 15 osob · cena za osobu</span><span lang-en>min. 15 guests · price per person</span></span>
+      </div>
+
+      <div class="options-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <label class="option-card" onclick="toggleCard(this, 'setmenu')" data-group="setmenu" data-price="245">
+          <input type="checkbox" name="setmenu" value="menu1">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Menu 1</span><span lang-en>Menu 1</span></div>
+          <div class="card-detail"><span lang-cz>Hovězí vývar + kuřecí řízek, bramborový salát</span><span lang-en>Beef broth + chicken schnitzel, potato salad</span></div>
+          <div class="card-price">245 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'setmenu')" data-group="setmenu" data-price="395">
+          <input type="checkbox" name="setmenu" value="menu2">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Menu 2</span><span lang-en>Menu 2</span></div>
+          <div class="card-detail"><span lang-cz>Kulajda + grilovaný losos, glazovaná zelenina</span><span lang-en>Kulajda soup + grilled salmon, glazed veg</span></div>
+          <div class="card-price">395 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'setmenu')" data-group="setmenu" data-price="395">
+          <input type="checkbox" name="setmenu" value="menu3">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Menu 3</span><span lang-en>Menu 3</span></div>
+          <div class="card-detail"><span lang-cz>Bruschetta + konfitovaná hovězí líčka, celerové pyré</span><span lang-en>Bruschetta + braised beef cheeks, celeriac</span></div>
+          <div class="card-price">395 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'setmenu')" data-group="setmenu" data-price="550">
+          <input type="checkbox" name="setmenu" value="menu4">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Menu 4</span><span lang-en>Menu 4</span></div>
+          <div class="card-detail"><span lang-cz>Gratinovaný kozí sýr + grilovaný telecí steak, tiramisu</span><span lang-en>Goat cheese gratin + grilled veal steak, tiramisu</span></div>
+          <div class="card-price">550 Kč/os</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- SUBSEKCE: Raut -->
+    <div class="food-subsection">
+      <div class="subsection-header">
+        <span lang-cz>🥗 Raut</span>
+        <span lang-en>🥗 Buffet</span>
+        <span class="subsection-note"><span lang-cz>min. 15 osob · 600 g/os · cena za osobu</span><span lang-en>min. 15 guests · 600g/p · price per person</span></span>
+      </div>
+
+      <div class="options-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+        <label class="option-card" onclick="toggleCard(this, 'raut')" data-group="raut" data-price="495">
+          <input type="checkbox" name="raut" value="raut-tradicni">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Tradiční gurmánský</span><span lang-en>Traditional Gourmet</span></div>
+          <div class="card-detail"><span lang-cz>Studené: uzeninová + sýrová mísa, salát, pečivo<br>Teplé: mini řízečky, kuřecí roláda, hovězí guláš<br>Dezerty: čokoládový koláč, závin, ovoce</span><span lang-en>Cold: charcuterie + cheese board, salad, bread<br>Hot: mini schnitzels, chicken roulade, beef goulash<br>Desserts: chocolate cake, strudel, fruit</span></div>
+          <div class="card-price">495 Kč/os</div>
+        </label>
+
+        <label class="option-card" onclick="toggleCard(this, 'raut')" data-group="raut" data-price="695">
+          <input type="checkbox" name="raut" value="raut-premium">
+          <div class="check"></div>
+          <div class="card-title"><span lang-cz>Prémiový gurmánský</span><span lang-en>Premium Gourmet</span></div>
+          <div class="card-detail"><span lang-cz>Studené: tatarský biftek, uzeninová + sýrová mísa<br>Teplé: vepřová panenka, kuřecí prsa v liškové omáčce, losos<br>Dezerty: čokoládový koláč, závin, ovoce</span><span lang-en>Cold: beef tartare, charcuterie + cheese board<br>Hot: pork tenderloin, chicken in chanterelle sauce, salmon<br>Desserts: chocolate cake, strudel, fruit</span></div>
+          <div class="card-price">695 Kč/os</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="wavy"></div>
+
+    <!-- STEP 4: NÁPOJE -->
+    <div class="section-label">
+      <div class="num">4</div>
+      <h2><span lang-cz>Nápojový program</span><span lang-en>Drinks Package</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="options-grid">
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="0">
+        <input type="checkbox" name="drinks" value="none">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Bez nápojového balíčku</span><span lang-en>No drinks package</span></div>
+        <div class="card-detail"><span lang-cz>Konzumace dle ceníku</span><span lang-en>Pay per consumption</span></div>
+        <div class="card-price">—</div>
+      </label>
+
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="75">
+        <input type="checkbox" name="drinks" value="welcome">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Uvítací prosecco</span><span lang-en>Welcome Prosecco</span></div>
+        <div class="card-detail"><span lang-cz>Prosecco Treviso DOC</span><span lang-en>Prosecco Treviso DOC</span></div>
+        <div class="card-price">75 Kč/os</div>
+      </label>
+
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="125">
+        <input type="checkbox" name="drinks" value="pack3">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Balíček 3 nápojů</span><span lang-en>3-Drink Package</span></div>
+        <div class="card-detail"><span lang-cz>Pivo 0,5 l + víno 0,1 l + nealko</span><span lang-en>Beer 0.5 l + wine 0.1 l + soft drink</span></div>
+        <div class="card-price">125 Kč/os</div>
+      </label>
+
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="190">
+        <input type="checkbox" name="drinks" value="1h">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Open bar – 1 hodina</span><span lang-en>Open Bar – 1 hour</span></div>
+        <div class="card-detail"><span lang-cz>Pivo, víno, nealko bez omezení</span><span lang-en>Beer, wine, soft drinks unlimited</span></div>
+        <div class="card-price">190 Kč/os</div>
+      </label>
+
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="360">
+        <input type="checkbox" name="drinks" value="2h">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Open bar – 2 hodiny</span><span lang-en>Open Bar – 2 hours</span></div>
+        <div class="card-detail"><span lang-cz>Pivo, víno, nealko bez omezení</span><span lang-en>Beer, wine, soft drinks unlimited</span></div>
+        <div class="card-price">360 Kč/os</div>
+      </label>
+
+      <label class="option-card" onclick="toggleCard(this, 'drinks')" data-group="drinks" data-price="520">
+        <input type="checkbox" name="drinks" value="3h">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Open bar – 3 hodiny</span><span lang-en>Open Bar – 3 hours</span></div>
+        <div class="card-detail"><span lang-cz>Pivo, víno, nealko bez omezení</span><span lang-en>Beer, wine, soft drinks unlimited</span></div>
+        <div class="card-price">520 Kč/os</div>
+      </label>
+    </div>
+
+    <div class="wavy"></div>
+
+    <!-- STEP 5: UBYTOVÁNÍ -->
+    <div class="section-label">
+      <div class="num">5</div>
+      <h2><span lang-cz>Ubytování</span><span lang-en>Accommodation</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="options-grid">
+      <label class="option-card radio-style" onclick="selectOvernight('ne', this)">
+        <input type="radio" name="overnight" value="ne">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Bez ubytování</span><span lang-en>No accommodation</span></div>
+        <div class="card-detail"><span lang-cz>Pouze akce</span><span lang-en>Event only</span></div>
+        <div class="card-price">—</div>
+      </label>
+
+      <label class="option-card radio-style" onclick="selectOvernight('ano', this)">
+        <input type="radio" name="overnight" value="ano">
+        <div class="check"></div>
+        <div class="card-title"><span lang-cz>Zájem o ubytování</span><span lang-en>Accommodation required</span></div>
+        <div class="card-detail"><span lang-cz>34 pokojů / 90 lůžek, privátní sauna, masáže</span><span lang-en>34 rooms / 90 beds, private sauna, massage</span></div>
+        <div class="card-price"><span lang-cz>dle nabídky</span><span lang-en>on request</span></div>
+      </label>
+    </div>
+
+    <div class="overnight-sub" id="overnight-sub">
+      <label><span lang-cz>Počet pokojů / nocí (upřesněte)</span><span lang-en>Rooms / nights (specify)</span></label>
+      <input type="text" name="overnight_detail" placeholder="např. 10 pokojů, 1 noc / e.g. 10 rooms, 1 night">
+    </div>
+
+    <div class="wavy"></div>
+
+    <!-- PRICE SUMMARY -->
+    <div class="price-box" id="price-box">
+      <div>
+        <div class="label"><span lang-cz>Orientační cena celkem</span><span lang-en>Estimated Total</span></div>
+        <div class="amount" id="price-total">—</div>
+        <div class="price-breakdown" id="price-breakdown"></div>
+      </div>
+      <div class="note" style="text-align:right; max-width:200px;">
+        <span lang-cz>Finální cena bude upřesněna na základě vaší poptávky.</span>
+        <span lang-en>Final price confirmed upon inquiry review.</span>
+      </div>
+    </div>
+
+    <!-- STEP 6: KONTAKT -->
+    <div class="section-label">
+      <div class="num">6</div>
+      <h2><span lang-cz>Kontaktní údaje</span><span lang-en>Contact Details</span></h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="field-group">
+        <label><span lang-cz>Jméno a příjmení</span><span lang-en>Full Name</span> <span class="required-star">*</span></label>
+        <input type="text" name="name" required placeholder="Jan Novák">
+      </div>
+      <div class="field-group">
+        <label><span lang-cz>Název firmy / organizace</span><span lang-en>Company / Organization</span></label>
+        <input type="text" name="company" placeholder="ABC s.r.o.">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="field-group">
+        <label><span lang-cz>E-mail</span><span lang-en>Email</span> <span class="required-star">*</span></label>
+        <input type="email" name="email" required placeholder="jan@example.cz">
+      </div>
+      <div class="field-group">
+        <label><span lang-cz>Telefon</span><span lang-en>Phone</span> <span class="required-star">*</span></label>
+        <input type="tel" name="phone" required placeholder="+420 777 000 000">
+      </div>
+    </div>
+    <div class="field-group">
+      <label><span lang-cz>Poznámka / speciální požadavky</span><span lang-en>Notes / Special Requirements</span></label>
+      <textarea name="note" placeholder="Dieta, dekorace, AV technika, jiný požadavek..."></textarea>
+    </div>
+
+    <div class="consent-row">
+      <input type="checkbox" id="consent" name="consent" required>
+      <label for="consent">
+        <span lang-cz>Souhlasím se zpracováním osobních údajů za účelem vyřízení poptávky. Hotel Slovan bude kontaktovat pouze v souvislosti s touto poptávkou.</span>
+        <span lang-en>I consent to the processing of personal data for the purpose of handling this inquiry. Hotel Slovan will only be contacted in connection with this inquiry.</span>
+      </label>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <button type="submit" class="submit-btn">
+        <span lang-cz>Odeslat poptávku →</span>
+        <span lang-en>Send Inquiry →</span>
+      </button>
+    </div>
+
+    <p class="hint" style="text-align:center; margin-top:12px;">
+      <span lang-cz>Odpovíme do 24 hodin. Poptávka je nezávazná.</span>
+      <span lang-en>We'll respond within 24 hours. Non-binding inquiry.</span>
+    </p>
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-panel" id="success-panel">
+    <div class="icon">✓</div>
+    <h2><span lang-cz>Poptávka odeslána!</span><span lang-en>Inquiry Sent!</span></h2>
+    <p>
+      <span lang-cz>Děkujeme za zájem o Hotel Slovan.<br>Ozveme se vám do 24 hodin.</span>
+      <span lang-en>Thank you for your interest in Hotel Slovan.<br>We will get back to you within 24 hours.</span>
+    </p>
+  </div>
+</div>
+
+<footer>
+  <strong>Hotel Slovan</strong>
+  Tradice od roku 1868 · Jeseník, Česká republika
+</footer>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const FORMSPREE_URL = 'https://formspree.io/f/xpqeqwqv';
+// ──────────────────────────────────────────────────────────
+
+// Set min date to today
+document.getElementById('event-date').min = new Date().toISOString().split('T')[0];
+
+let currentLang = 'cz';
+let selectedVenue = null;
+let selectedCoffeePrice = 0;
+let selectedCoffeeTime = null;
+let selectedSetmenuPrice = 0;
+let selectedRautPrice = 0;
+let selectedDrinks = 0;
+
+function setLang(lang) {
+  currentLang = lang;
+  document.body.classList.toggle('en-mode', lang === 'en');
+  document.getElementById('btn-cz').classList.toggle('active', lang === 'cz');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.documentElement.lang = lang === 'en' ? 'en' : 'cs';
+}
+
+function selectVenue(val, el) {
+  selectedVenue = val;
+  document.querySelectorAll('[id^="card-"]').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  updatePrice();
+}
+
+function selectOvernight(val, el) {
+  document.querySelectorAll('[name="overnight"]').forEach(r => {
+    r.closest('.option-card').classList.remove('selected');
+  });
+  el.classList.add('selected');
+  el.querySelector('input').checked = true;
+  document.getElementById('overnight-sub').classList.toggle('visible', val === 'ano');
+}
+
+function selectNoFood(el) {
+  ['coffee','setmenu','raut'].forEach(g => {
+    document.querySelectorAll(`[data-group="${g}"]`).forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('input').checked = false;
+    });
+  });
+  selectedCoffeePrice = 0;
+  selectedCoffeeTime = null;
+  selectedSetmenuPrice = 0;
+  selectedRautPrice = 0;
+  document.getElementById('coffee-time-row').classList.remove('visible');
+  document.getElementById('coffee-both-note').style.display = 'none';
+  document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+  const wasSelected = el.classList.contains('selected');
+  el.classList.toggle('selected', !wasSelected);
+  el.querySelector('input').checked = !wasSelected;
+  updatePrice();
+}
+
+function toggleCard(el, group) {
+  const noFood = document.querySelector('.no-food-card');
+  if (noFood) { noFood.classList.remove('selected'); noFood.querySelector('input').checked = false; }
+
+  if (group === 'coffee') {
+    const wasSelected = el.classList.contains('selected');
+    document.querySelectorAll('[data-group="coffee"]').forEach(c => {
+      c.classList.remove('selected'); c.querySelector('input').checked = false;
+    });
+    if (!wasSelected) {
+      el.classList.add('selected'); el.querySelector('input').checked = true;
+      selectedCoffeePrice = parseFloat(el.dataset.price) || 0;
+      document.getElementById('coffee-time-row').classList.add('visible');
+    } else {
+      selectedCoffeePrice = 0; selectedCoffeeTime = null;
+      document.getElementById('coffee-time-row').classList.remove('visible');
+      document.getElementById('coffee-both-note').style.display = 'none';
+      document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+    }
+  } else if (group === 'setmenu') {
+    const wasSelected = el.classList.contains('selected');
+    document.querySelectorAll('[data-group="setmenu"]').forEach(c => {
+      c.classList.remove('selected'); c.querySelector('input').checked = false;
+    });
+    if (!wasSelected) {
+      el.classList.add('selected'); el.querySelector('input').checked = true;
+      selectedSetmenuPrice = parseFloat(el.dataset.price) || 0;
+    } else {
+      selectedSetmenuPrice = 0;
+    }
+  } else if (group === 'raut') {
+    const wasSelected = el.classList.contains('selected');
+    document.querySelectorAll('[data-group="raut"]').forEach(c => {
+      c.classList.remove('selected'); c.querySelector('input').checked = false;
+    });
+    if (!wasSelected) {
+      el.classList.add('selected'); el.querySelector('input').checked = true;
+      selectedRautPrice = parseFloat(el.dataset.price) || 0;
+    } else {
+      selectedRautPrice = 0;
+    }
+  } else if (group === 'drinks') {
+    document.querySelectorAll('[data-group="drinks"]').forEach(c => {
+      c.classList.remove('selected'); c.querySelector('input').checked = false;
+    });
+    el.classList.add('selected'); el.querySelector('input').checked = true;
+    selectedDrinks = parseFloat(el.dataset.price) || 0;
+  }
+  updatePrice();
+}
+
+function setCoffeeTime(val, el) {
+  selectedCoffeeTime = val;
+  document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  el.querySelector('input').checked = true;
+  document.getElementById('coffee-both-note').style.display = val === 'obe' ? 'block' : 'none';
+  updatePrice();
+}
+
+function getVenuePrice() {
+  if (!selectedVenue) return 0;
+  const dur = document.getElementById('duration').value;
+  if (selectedVenue === 'ripper') return dur === 'full' ? 8000 : 5000;
+  if (selectedVenue === 'salonek') return dur === 'full' ? 6000 : 4000;
+  return 0;
+}
+
+function updatePrice() {
+  const persons = parseInt(document.getElementById('persons').value) || 0;
+  const venuePrice = getVenuePrice();
+  const coffeeMultiplier = selectedCoffeeTime === 'obe' ? 2 : 1;
+  const coffeeTotal = selectedCoffeePrice * coffeeMultiplier * persons;
+  const setmenuTotal = selectedSetmenuPrice * persons;
+  const rautTotal = selectedRautPrice * persons;
+  const drinksTotal = selectedDrinks * persons;
+  const total = venuePrice + coffeeTotal + setmenuTotal + rautTotal + drinksTotal;
+
+  const el = document.getElementById('price-total');
+  const breakdown = document.getElementById('price-breakdown');
+
+  if (total === 0) { el.textContent = '—'; breakdown.textContent = ''; return; }
+
+  el.textContent = total.toLocaleString('cs-CZ') + ' Kč';
+  let parts = [];
+  if (venuePrice > 0) parts.push(`Pronájem: ${venuePrice.toLocaleString('cs-CZ')} Kč`);
+  if (coffeeTotal > 0 && persons > 0) {
+    const lbl = selectedCoffeeTime === 'obe'
+      ? `Kávové přestávky (2×): ${selectedCoffeePrice} × 2 × ${persons} os.`
+      : `Kávová přestávka: ${selectedCoffeePrice} × ${persons} os.`;
+    parts.push(`${lbl} = ${coffeeTotal.toLocaleString('cs-CZ')} Kč`);
+  }
+  if (setmenuTotal > 0 && persons > 0) parts.push(`Set menu: ${selectedSetmenuPrice} × ${persons} os. = ${setmenuTotal.toLocaleString('cs-CZ')} Kč`);
+  if (rautTotal > 0 && persons > 0) parts.push(`Raut: ${selectedRautPrice} × ${persons} os. = ${rautTotal.toLocaleString('cs-CZ')} Kč`);
+  if (drinksTotal > 0 && persons > 0) parts.push(`Nápoje: ${selectedDrinks} × ${persons} os. = ${drinksTotal.toLocaleString('cs-CZ')} Kč`);
+  breakdown.innerHTML = parts.join('<br>');
+}
+
+
+document.getElementById('inquiry-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  if (!document.getElementById('consent').checked) {
+    alert(currentLang === 'cz' ? 'Prosím potvrďte souhlas se zpracováním údajů.' : 'Please confirm consent.');
+    return;
+  }
+
+  const fd = new FormData(form);
+  const data = Object.fromEntries(fd.entries());
+
+  const selCoffee = document.querySelector('[data-group="coffee"].selected .card-title');
+  const selSetmenu = document.querySelector('[data-group="setmenu"].selected .card-title');
+  const selRaut = document.querySelector('[data-group="raut"].selected .card-title');
+  const selDrinks = document.querySelector('[data-group="drinks"].selected .card-title');
+
+  const coffeeTimeLabels = { dopoledni: 'dopolední', odpoledni: 'odpolední', obe: 'obě (2×)' };
+  const coffeeLabel = selCoffee
+    ? `${selCoffee.textContent.trim()}${selectedCoffeeTime ? ' – ' + coffeeTimeLabels[selectedCoffeeTime] : ''}`
+    : '—';
+
+  data.kavove_prestávky = coffeeLabel;
+  data.set_menu = selSetmenu ? selSetmenu.textContent.trim() : '—';
+  data.raut = selRaut ? selRaut.textContent.trim() : '—';
+  data.drinks = selDrinks ? selDrinks.textContent.trim() : '—';
+
+  const venueName = data.venue === 'ripper' ? 'Sál Ripper' : data.venue === 'salonek' ? 'Salónek' : '—';
+  const dur = data.duration === 'full' ? 'Celodenní' : 'Půldenní';
+
+  const submitBtn = form.querySelector('.submit-btn');
+  submitBtn.textContent = '⏳ Odesílám...';
+  submitBtn.disabled = true;
+
+  const payload = {
+    _subject: `Poptávka – ${data.name} | ${data.date || 'datum neurčeno'} | ${data.persons || '?'} os.`,
+    prostor: venueName,
+    delka_pronajmu: dur,
+    usporadani: data.layout,
+    datum_akce: data.date || '—',
+    pocet_osob: data.persons || '—',
+    kavove_prestávky: data.kavove_prestávky,
+    set_menu: data.set_menu,
+    raut: data.raut,
+    napoje: data.drinks,
+    ubytovani: data.overnight === 'ano' ? `Zájem – ${data.overnight_detail || 'neupřesněno'}` : 'Bez ubytování',
+    orientacni_cena: document.getElementById('price-total').textContent,
+    jmeno: data.name,
+    firma: data.company || '—',
+    email: data.email,
+    telefon: data.phone,
+    poznamka: data.note || '—',
+    odeslano: new Date().toLocaleString('cs-CZ'),
+  };
+
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      document.getElementById('inquiry-form').style.display = 'none';
+      document.getElementById('success-panel').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const err = await res.json();
+      throw new Error(err.error || 'Chyba serveru');
+    }
+  } catch (err) {
+    submitBtn.textContent = currentLang === 'cz' ? 'Odeslat poptávku →' : 'Send Inquiry →';
+    submitBtn.disabled = false;
+    alert(currentLang === 'cz'
+      ? 'Nepodařilo se odeslat poptávku. Zkontrolujte připojení a zkuste znovu.\n\nChyba: ' + err.message
+      : 'Failed to send inquiry. Check your connection and try again.\n\nError: ' + err.message);
+  }
+});
+</script>
+</body>
+</html>
