@@ -436,10 +436,10 @@
   .required-star { color: var(--gold); margin-left: 2px; }
   .hint { font-size: 11px; color: var(--text-mid); margin-top: 4px; opacity: 0.7; font-style: italic; }
 
-  [lang-cz] { display: block; }
-  [lang-en] { display: none; }
-  .en-mode [lang-cz] { display: none; }
-  .en-mode [lang-en] { display: block; }
+  [lang-cz] { display: block !important; }
+  [lang-en] { display: none !important; }
+  .en-mode [lang-cz] { display: none !important; }
+  .en-mode [lang-en] { display: block !important; }
 
   .overnight-sub { margin-top: 12px; padding: 14px 16px; background: var(--cream-dark); border-radius: 3px; border-left: 3px solid var(--burgundy); display: none; }
   .overnight-sub.visible { display: block; }
@@ -538,7 +538,10 @@
 </div>
 
 <div class="hero">
-  <div class="hero-logo"><span>Hotel Slovan · Tradice od roku 1868</span></div>
+  <div class="hero-logo">
+    <span lang-cz>Hotel Slovan · Tradice od roku 1868</span>
+    <span lang-en>Hotel Slovan · Est. 1868</span>
+  </div>
   <h1>
     <span lang-cz>Poptávka akce &amp;<br><em>banketní nabídka</em></span>
     <span lang-en>Event Inquiry &amp;<br><em>Banquet Offer</em></span>
@@ -854,7 +857,7 @@
 
     <div class="overnight-sub" id="overnight-sub">
       <label><span lang-cz>Počet pokojů / nocí (upřesněte)</span><span lang-en>Rooms / nights (specify)</span></label>
-      <input type="text" name="overnight_detail" placeholder="např. 10 pokojů, 1 noc / e.g. 10 rooms, 1 night">
+      <input type="text" name="overnight_detail" data-ph-cz="např. 10 pokojů, 1 noc" data-ph-en="e.g. 10 rooms, 1 night" placeholder="např. 10 pokojů, 1 noc">
     </div>
 
     <div class="wavy"></div>
@@ -882,17 +885,17 @@
     <div class="two-col">
       <div class="field-group">
         <label><span lang-cz>Jméno a příjmení</span><span lang-en>Full Name</span> <span class="required-star">*</span></label>
-        <input type="text" name="name" required placeholder="Jan Novák">
+        <input type="text" name="name" required data-ph-cz="Jan Novák" data-ph-en="John Smith" placeholder="Jan Novák">
       </div>
       <div class="field-group">
         <label><span lang-cz>Název firmy / organizace</span><span lang-en>Company / Organization</span></label>
-        <input type="text" name="company" placeholder="ABC s.r.o.">
+        <input type="text" name="company" data-ph-cz="ABC s.r.o." data-ph-en="ABC Inc." placeholder="ABC s.r.o.">
       </div>
     </div>
     <div class="two-col">
       <div class="field-group">
         <label><span lang-cz>E-mail</span><span lang-en>Email</span> <span class="required-star">*</span></label>
-        <input type="email" name="email" required placeholder="jan@example.cz">
+        <input type="email" name="email" required data-ph-cz="jan@example.cz" data-ph-en="john@example.com" placeholder="jan@example.cz">
       </div>
       <div class="field-group">
         <label><span lang-cz>Telefon</span><span lang-en>Phone</span> <span class="required-star">*</span></label>
@@ -901,7 +904,7 @@
     </div>
     <div class="field-group">
       <label><span lang-cz>Poznámka / speciální požadavky</span><span lang-en>Notes / Special Requirements</span></label>
-      <textarea name="note" placeholder="Dieta, dekorace, AV technika, jiný požadavek..."></textarea>
+      <textarea name="note" data-ph-cz="Dieta, dekorace, AV technika, jiný požadavek..." data-ph-en="Diet, decoration, AV equipment, other request..." placeholder="Dieta, dekorace, AV technika, jiný požadavek..."></textarea>
     </div>
 
     <div class="consent-row">
@@ -938,7 +941,8 @@
 
 <footer>
   <strong>Hotel Slovan</strong>
-  Tradice od roku 1868 · Jeseník, Česká republika
+  <span lang-cz>Tradice od roku 1868 · Jeseník, Česká republika</span>
+  <span lang-en>Est. 1868 · Jeseník, Czech Republic</span>
 </footer>
 
 <script>
@@ -964,6 +968,10 @@ function setLang(lang) {
   document.getElementById('btn-cz').classList.toggle('active', lang === 'cz');
   document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   document.documentElement.lang = lang === 'en' ? 'en' : 'cs';
+  document.querySelectorAll('[data-ph-cz]').forEach(el => {
+    el.placeholder = lang === 'en' ? el.dataset.phEn : el.dataset.phCz;
+  });
+  updatePrice();
 }
 
 function selectVenue(val, inputEl) {
@@ -1078,16 +1086,22 @@ function updatePrice() {
 
   el.textContent = total.toLocaleString('cs-CZ') + ' Kč';
   let parts = [];
-  if (venuePrice > 0) parts.push(`Pronájem: ${venuePrice.toLocaleString('cs-CZ')} Kč`);
+  const isEn = currentLang === 'en';
+  const unit = isEn ? 'guests' : 'os.';
+  const labels = isEn
+    ? { venue: 'Venue rental', coffeeBoth: 'Coffee breaks (2×)', coffee: 'Coffee break', setmenu: 'Set menu', raut: 'Buffet', drinks: 'Drinks' }
+    : { venue: 'Pronájem', coffeeBoth: 'Kávové přestávky (2×)', coffee: 'Kávová přestávka', setmenu: 'Set menu', raut: 'Raut', drinks: 'Nápoje' };
+
+  if (venuePrice > 0) parts.push(`${labels.venue}: ${venuePrice.toLocaleString('cs-CZ')} Kč`);
   if (coffeeTotal > 0 && persons > 0) {
     const lbl = selectedCoffeeTime === 'obe'
-      ? `Kávové přestávky (2×): ${selectedCoffeePrice} × 2 × ${persons} os.`
-      : `Kávová přestávka: ${selectedCoffeePrice} × ${persons} os.`;
+      ? `${labels.coffeeBoth}: ${selectedCoffeePrice} × 2 × ${persons} ${unit}`
+      : `${labels.coffee}: ${selectedCoffeePrice} × ${persons} ${unit}`;
     parts.push(`${lbl} = ${coffeeTotal.toLocaleString('cs-CZ')} Kč`);
   }
-  if (setmenuTotal > 0 && persons > 0) parts.push(`Set menu: ${selectedSetmenuPrice} × ${persons} os. = ${setmenuTotal.toLocaleString('cs-CZ')} Kč`);
-  if (rautTotal > 0 && persons > 0) parts.push(`Raut: ${selectedRautPrice} × ${persons} os. = ${rautTotal.toLocaleString('cs-CZ')} Kč`);
-  if (drinksTotal > 0 && persons > 0) parts.push(`Nápoje: ${drinksPerPerson} × ${persons} os. = ${drinksTotal.toLocaleString('cs-CZ')} Kč`);
+  if (setmenuTotal > 0 && persons > 0) parts.push(`${labels.setmenu}: ${selectedSetmenuPrice} × ${persons} ${unit} = ${setmenuTotal.toLocaleString('cs-CZ')} Kč`);
+  if (rautTotal > 0 && persons > 0) parts.push(`${labels.raut}: ${selectedRautPrice} × ${persons} ${unit} = ${rautTotal.toLocaleString('cs-CZ')} Kč`);
+  if (drinksTotal > 0 && persons > 0) parts.push(`${labels.drinks}: ${drinksPerPerson} × ${persons} ${unit} = ${drinksTotal.toLocaleString('cs-CZ')} Kč`);
   breakdown.innerHTML = parts.join('<br>');
 }
 
@@ -1130,7 +1144,7 @@ document.getElementById('inquiry-form').addEventListener('submit', async functio
   const dur = data.duration === 'full' ? 'Celodenní' : 'Půldenní';
 
   const submitBtn = form.querySelector('.submit-btn');
-  submitBtn.textContent = '⏳ Odesílám...';
+  submitBtn.textContent = currentLang === 'cz' ? '⏳ Odesílám...' : '⏳ Sending...';
   submitBtn.disabled = true;
 
   const payload = {
