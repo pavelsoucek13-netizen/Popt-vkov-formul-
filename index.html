@@ -525,6 +525,38 @@
     font-style: italic;
   }
 
+  /* Set menu — per-variant guest count */
+  .menu-qty-row {
+    background: var(--cream-dark);
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-top: 4px;
+    display: none;
+  }
+  .menu-qty-row.visible { display: block; }
+  .menu-qty-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .menu-qty-field:last-child { margin-bottom: 0; }
+  .menu-qty-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+  .menu-qty-field input {
+    width: 90px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 14px;
+    text-align: center;
+    outline: none;
+  }
+  .menu-qty-field input:focus { border-color: var(--burgundy); }
+  .menu-qty-note { margin-top: 8px; font-size: 12px; color: var(--burgundy); font-style: italic; }
+
   /* No-food card horizontal style */
   .no-food-card { display: flex !important; flex-direction: row !important; align-items: center; gap: 16px; margin-bottom: 20px; }
   .no-food-card .check { margin-bottom: 0; flex-shrink: 0; }
@@ -710,6 +742,10 @@
         <span lang-en>🍽 Set Menu</span>
         <span class="subsection-note"><span lang-cz>min. 15 osob · cena za osobu</span><span lang-en>min. 15 guests · price per person</span></span>
       </div>
+      <p class="hint" style="margin-bottom:10px;">
+        <span lang-cz>Lze vybrat až 2 varianty a rozdělit mezi ně počet osob</span>
+        <span lang-en>Up to 2 variants can be selected, with guests split between them</span>
+      </p>
 
       <div class="options-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
         <label class="option-card" data-group="setmenu" data-price="245">
@@ -743,6 +779,15 @@
           <div class="card-detail"><span lang-cz>Gratinovaný kozí sýr + grilovaný telecí steak, tiramisu</span><span lang-en>Goat cheese gratin + grilled veal steak, tiramisu</span></div>
           <div class="card-price">550 Kč/os</div>
         </label>
+      </div>
+
+      <div class="menu-qty-row" id="menu-qty-row">
+        <div class="coffee-time-label">
+          <span lang-cz>Počet osob pro vybraná menu</span>
+          <span lang-en>Guest count per selected menu</span>
+        </div>
+        <div id="menu-qty-fields"></div>
+        <div class="menu-qty-note" id="menu-qty-note"></div>
       </div>
     </div>
 
@@ -959,7 +1004,6 @@ let currentLang = 'cz';
 let selectedVenue = null;
 let selectedCoffeePrice = 0;
 let selectedCoffeeTime = null;
-let selectedSetmenuPrice = 0;
 let selectedRautPrice = 0;
 
 function setLang(lang) {
@@ -971,6 +1015,7 @@ function setLang(lang) {
   document.querySelectorAll('[data-ph-cz]').forEach(el => {
     el.placeholder = lang === 'en' ? el.dataset.phEn : el.dataset.phCz;
   });
+  renderMenuQtyFields();
   updatePrice();
 }
 
@@ -998,12 +1043,12 @@ function selectNoFood(inputEl) {
   });
   selectedCoffeePrice = 0;
   selectedCoffeeTime = null;
-  selectedSetmenuPrice = 0;
   selectedRautPrice = 0;
   document.getElementById('coffee-time-row').classList.remove('visible');
   document.getElementById('coffee-both-note').style.display = 'none';
   document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
   inputEl.closest('.option-card').classList.toggle('selected', inputEl.checked);
+  renderMenuQtyFields();
   updatePrice();
 }
 
@@ -1013,6 +1058,21 @@ function toggleCard(inputEl, group) {
   if (noFoodInput && noFoodInput.checked) {
     noFoodInput.checked = false;
     noFoodInput.closest('.option-card').classList.remove('selected');
+  }
+
+  if (group === 'setmenu') {
+    if (inputEl.checked) {
+      const selectedCount = document.querySelectorAll('[data-group="setmenu"] input:checked').length;
+      if (selectedCount > 2) {
+        inputEl.checked = false;
+        alert(currentLang === 'cz' ? 'Lze vybrat maximálně 2 varianty set menu.' : 'You can select a maximum of 2 set menu variants.');
+        return;
+      }
+    }
+    card.classList.toggle('selected', inputEl.checked);
+    renderMenuQtyFields();
+    updatePrice();
+    return;
   }
 
   document.querySelectorAll(`[data-group="${group}"]`).forEach(c => {
@@ -1030,12 +1090,97 @@ function toggleCard(inputEl, group) {
       document.getElementById('coffee-both-note').style.display = 'none';
       document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('active'));
     }
-  } else if (group === 'setmenu') {
-    selectedSetmenuPrice = inputEl.checked ? (parseFloat(card.dataset.price) || 0) : 0;
   } else if (group === 'raut') {
     selectedRautPrice = inputEl.checked ? (parseFloat(card.dataset.price) || 0) : 0;
   }
   updatePrice();
+}
+
+function renderMenuQtyFields() {
+  const container = document.getElementById('menu-qty-fields');
+  const row = document.getElementById('menu-qty-row');
+  const selectedCards = Array.from(document.querySelectorAll('[data-group="setmenu"].selected'));
+
+  const existing = {};
+  container.querySelectorAll('input[data-menu-value]').forEach(inp => {
+    existing[inp.dataset.menuValue] = inp.value;
+  });
+
+  row.classList.toggle('visible', selectedCards.length > 0);
+  container.innerHTML = '';
+
+  const totalPersons = parseInt(document.getElementById('persons').value) || 0;
+
+  selectedCards.forEach(card => {
+    const input = card.querySelector('input');
+    const value = input.value;
+    const titleEl = card.querySelector('.card-title');
+    const name = currentLang === 'en'
+      ? titleEl.querySelector('[lang-en]').textContent.trim()
+      : titleEl.querySelector('[lang-cz]').textContent.trim();
+
+    const field = document.createElement('div');
+    field.className = 'menu-qty-field';
+
+    const label = document.createElement('span');
+    label.className = 'menu-qty-name';
+    label.textContent = name;
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = '1';
+    qtyInput.dataset.menuValue = value;
+    qtyInput.dataset.price = card.dataset.price || 0;
+    let defaultVal = existing[value];
+    if (defaultVal === undefined) {
+      defaultVal = selectedCards.length === 1 && totalPersons > 0 ? totalPersons : '';
+    }
+    qtyInput.value = defaultVal;
+    qtyInput.placeholder = currentLang === 'en' ? 'guests' : 'os.';
+    qtyInput.addEventListener('input', updatePrice);
+
+    field.appendChild(label);
+    field.appendChild(qtyInput);
+    container.appendChild(field);
+  });
+
+  updateMenuQtyNote();
+}
+
+function getSetmenuBreakdownParts() {
+  const isEn = currentLang === 'en';
+  const unit = isEn ? 'guests' : 'os.';
+  const label = 'Set menu';
+  let total = 0;
+  const parts = [];
+  document.querySelectorAll('#menu-qty-fields .menu-qty-field').forEach(field => {
+    const name = field.querySelector('.menu-qty-name').textContent;
+    const input = field.querySelector('input');
+    const qty = parseInt(input.value) || 0;
+    const price = parseFloat(input.dataset.price) || 0;
+    const lineTotal = price * qty;
+    total += lineTotal;
+    if (qty > 0 && price > 0) {
+      parts.push(`${label} – ${name}: ${price} × ${qty} ${unit} = ${lineTotal.toLocaleString('cs-CZ')} Kč`);
+    }
+  });
+  return { total, parts };
+}
+
+function updateMenuQtyNote() {
+  const note = document.getElementById('menu-qty-note');
+  const totalPersons = parseInt(document.getElementById('persons').value) || 0;
+  const fields = document.querySelectorAll('#menu-qty-fields input');
+  if (!fields.length || !totalPersons) { note.textContent = ''; return; }
+  let entered = 0;
+  fields.forEach(inp => { entered += parseInt(inp.value) || 0; });
+  if (entered !== totalPersons) {
+    note.textContent = currentLang === 'en'
+      ? `Entered ${entered} of ${totalPersons} guests`
+      : `Zadáno ${entered} z ${totalPersons} osob`;
+  } else {
+    note.textContent = '';
+  }
 }
 
 function setCoffeeTime(val, inputEl) {
@@ -1073,11 +1218,13 @@ function updatePrice() {
   const venuePrice = getVenuePrice();
   const coffeeMultiplier = selectedCoffeeTime === 'obe' ? 2 : 1;
   const coffeeTotal = selectedCoffeePrice * coffeeMultiplier * persons;
-  const setmenuTotal = selectedSetmenuPrice * persons;
+  const { total: setmenuTotal, parts: setmenuParts } = getSetmenuBreakdownParts();
   const rautTotal = selectedRautPrice * persons;
   const drinksPerPerson = getDrinksTotalPerPerson();
   const drinksTotal = drinksPerPerson * persons;
   const total = venuePrice + coffeeTotal + setmenuTotal + rautTotal + drinksTotal;
+
+  updateMenuQtyNote();
 
   const el = document.getElementById('price-total');
   const breakdown = document.getElementById('price-breakdown');
@@ -1089,8 +1236,8 @@ function updatePrice() {
   const isEn = currentLang === 'en';
   const unit = isEn ? 'guests' : 'os.';
   const labels = isEn
-    ? { venue: 'Venue rental', coffeeBoth: 'Coffee breaks (2×)', coffee: 'Coffee break', setmenu: 'Set menu', raut: 'Buffet', drinks: 'Drinks' }
-    : { venue: 'Pronájem', coffeeBoth: 'Kávové přestávky (2×)', coffee: 'Kávová přestávka', setmenu: 'Set menu', raut: 'Raut', drinks: 'Nápoje' };
+    ? { venue: 'Venue rental', coffeeBoth: 'Coffee breaks (2×)', coffee: 'Coffee break', raut: 'Buffet', drinks: 'Drinks' }
+    : { venue: 'Pronájem', coffeeBoth: 'Kávové přestávky (2×)', coffee: 'Kávová přestávka', raut: 'Raut', drinks: 'Nápoje' };
 
   if (venuePrice > 0) parts.push(`${labels.venue}: ${venuePrice.toLocaleString('cs-CZ')} Kč`);
   if (coffeeTotal > 0 && persons > 0) {
@@ -1099,7 +1246,7 @@ function updatePrice() {
       : `${labels.coffee}: ${selectedCoffeePrice} × ${persons} ${unit}`;
     parts.push(`${lbl} = ${coffeeTotal.toLocaleString('cs-CZ')} Kč`);
   }
-  if (setmenuTotal > 0 && persons > 0) parts.push(`${labels.setmenu}: ${selectedSetmenuPrice} × ${persons} ${unit} = ${setmenuTotal.toLocaleString('cs-CZ')} Kč`);
+  parts = parts.concat(setmenuParts);
   if (rautTotal > 0 && persons > 0) parts.push(`${labels.raut}: ${selectedRautPrice} × ${persons} ${unit} = ${rautTotal.toLocaleString('cs-CZ')} Kč`);
   if (drinksTotal > 0 && persons > 0) parts.push(`${labels.drinks}: ${drinksPerPerson} × ${persons} ${unit} = ${drinksTotal.toLocaleString('cs-CZ')} Kč`);
   breakdown.innerHTML = parts.join('<br>');
@@ -1122,7 +1269,6 @@ document.getElementById('inquiry-form').addEventListener('submit', async functio
   const data = Object.fromEntries(fd.entries());
 
   const selCoffee = document.querySelector('[data-group="coffee"].selected .card-title');
-  const selSetmenu = document.querySelector('[data-group="setmenu"].selected .card-title');
   const selRaut = document.querySelector('[data-group="raut"].selected .card-title');
 
   const coffeeTimeLabels = { dopoledni: 'dopolední', odpoledni: 'odpolední', obe: 'obě (2×)' };
@@ -1131,7 +1277,15 @@ document.getElementById('inquiry-form').addEventListener('submit', async functio
     : '—';
 
   data.kavove_prestávky = coffeeLabel;
-  data.set_menu = selSetmenu ? selSetmenu.textContent.trim() : '—';
+
+  const setmenuLines = [];
+  document.querySelectorAll('#menu-qty-fields .menu-qty-field').forEach(field => {
+    const name = field.querySelector('.menu-qty-name').textContent.trim();
+    const qty = field.querySelector('input').value || '0';
+    setmenuLines.push(`${name} (${qty} os.)`);
+  });
+  data.set_menu = setmenuLines.length ? setmenuLines.join(', ') : '—';
+
   data.raut = selRaut ? selRaut.textContent.trim() : '—';
 
   const drinkLabels = [];
